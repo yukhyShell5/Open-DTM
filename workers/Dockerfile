@@ -12,7 +12,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/app_root"
 # Copy only necessary directories: 'workers' and 'common' (if it exists and is needed by worker)
 # We place them inside a directory called /app_root in the container.
 COPY ./workers /app_root/workers
-COPY ./common /app_root/common # Assuming 'common' might be used by worker later
+# COPY ./common /app_root/common # Assuming 'common' might be used by worker later
 
 # Change working directory to where the worker code is, for convenience
 WORKDIR /app_root/workers

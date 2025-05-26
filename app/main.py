@@ -2,6 +2,10 @@ from fastapi import FastAPI
 
 app = FastAPI(title="Distributed Brute-Force Framework API")
 
+@app.get("/")
+def main():
+    return 'Hello sur la page de Distributed Brute-Force Framework'
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "ok"}
