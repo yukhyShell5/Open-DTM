@@ -77,104 +77,170 @@ This project is primarily a collection of design documents that detail its archi
 
 ## 5. Conceptual Setup and Running (Illustrative)
 
-The following steps are a *conceptual guide* on how one might set up and run the implemented version of this framework. **Note: No code is currently implemented.**
+The following sections describe how one might build, configure, and run the system if it were fully implemented, primarily using Docker Compose.
 
-### Prerequisites:
+### Building and Running with Docker Compose
 
-*   Python 3.8+
-*   Redis server (running and accessible)
-*   MinIO server (or other S3-compatible object storage, running and accessible)
-*   `pip` (Python package installer)
-*   `git` (for cloning the repository)
+This is the recommended way to run the system for a development or testing environment.
 
-### Installation (Conceptual):
+**Prerequisites:**
+*   Docker installed and running.
+*   Docker Compose installed.
 
-1.  **Clone the repository (if it were implemented):**
+**Steps:**
+
+1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/yourusername/educational-bruteforce-framework.git # Replace with actual URL if hosted
     cd educational-bruteforce-framework
     ```
 
-2.  **Create and activate a virtual environment (recommended):**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate # On Windows: venv\Scripts\activate
-    ```
-
-3.  **Install dependencies (conceptual `requirements.txt`):**
-    A `requirements.txt` file would be created with necessary packages like:
-    ```
-    fastapi
-    uvicorn[standard]
-    redis
-    boto3 # For S3/MinIO
-    pydantic
-    # ... other necessary libraries
-    ```
-    Installation command:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Set up Environment Variables:**
-    An `.env.example` file would be provided (see `docs/project_structure_and_snippets.md`). Copy it to `.env` and fill in your specific configurations (Redis host/port, MinIO access keys, etc.).
+2.  **Create and Customize `.env` File:**
+    Copy the example environment file and customize it if needed.
     ```bash
     cp .env.example .env
-    # Edit .env with your settings
     ```
+    Review `.env` and set variables like `TARGET_JOB_ID` for each worker instance you intend to run (if not scaling via Docker Compose initially, or if you want specific workers on specific jobs). For MinIO, the default credentials `minioadmin/minioadmin` are used in `docker-compose.yml`. If you change them there, update your S3 client configurations accordingly.
 
-### Running Redis and MinIO:
-
-*   Ensure your Redis server is running and accessible based on your `.env` configuration.
-*   Ensure your MinIO (or other S3) server is running, accessible, and configured with buckets for wordlists.
-
-### Running the API Server (Conceptual):
-
-1.  Navigate to the API server directory (based on `docs/project_structure_and_snippets.md`):
+3.  **Build and Start Services:**
+    Run the following command from the project root directory:
     ```bash
-    cd bruteforce_framework/app 
+    docker-compose up --build -d
     ```
-2.  Start the FastAPI application using Uvicorn:
+    This command will:
+    *   Build the Docker images for the `api_server`, `worker`, and `monitor` services as defined in their respective Dockerfiles.
+    *   Start all services defined in `docker-compose.yml` (Redis, MinIO, API Server, Worker(s), Monitor) in detached mode (`-d`).
+
+4.  **Checking Logs:**
+    To view the logs for specific services:
     ```bash
-    uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    docker-compose logs api_server
+    docker-compose logs worker
+    docker-compose logs monitor
+    # Use -f to follow logs: docker-compose logs -f api_server
     ```
-    The API server would then be accessible, e.g., at `http://localhost:8000/docs` for the OpenAPI documentation.
 
-### Running Worker Nodes (Conceptual):
-
-1.  Navigate to the worker directory:
+5.  **Stopping Services:**
+    To stop all running services:
     ```bash
-    cd bruteforce_framework/workers
+    docker-compose down
+    # To remove volumes as well (e.g., Redis data, MinIO data):
+    # docker-compose down -v
     ```
-2.  Start one or more worker instances. Workers would need configuration (via `.env` or command-line arguments) to connect to Redis and storage.
-    A worker might be started to listen for tasks from any job or be targeted:
+
+6.  **Scaling Workers (Example):**
+    After the initial `docker-compose up`, you can scale the number of worker instances:
     ```bash
-    python worker.py 
-    # Or, if designed to target specific jobs initially:
-    # python worker.py --job-id <specific_job_id_from_api>
+    docker-compose up --scale worker=3 -d
     ```
-    Multiple instances of `worker.py` could be run on different machines or in different terminals, each connecting to the same Redis and storage backend.
+    This command will ensure three instances of the `worker` service are running. Note that each worker instance will need its `TARGET_JOB_ID` configured, typically via environment variables in the `docker-compose.yml` or by updating the `.env` file if the `env_file` directive is used per service. For multiple workers targeting the *same* job, this is fine. For workers targeting *different* jobs, you would define multiple worker services in `docker-compose.yml` with different environment variable settings for `TARGET_JOB_ID`.
 
-### Submitting a Job (Conceptual):
+### Configuration
 
-Jobs would be submitted by making an HTTP POST request to the API server's `/api/v1/jobs` endpoint. This could be done using tools like `curl`, Postman, or a custom client script.
+The services within this framework (API Server, Worker, Monitor) are configured primarily through **environment variables**.
 
-Example using `curl` (refer to `docs/api_design.md` for the actual JSON payload structure):
-```bash
-curl -X POST "http://localhost:8000/api/v1/jobs" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "target_info": { "url": "http://example.com/login", "username_field": "user", "password_field": "pass" },
-           "wordlist_storage_type": "s3",
-           "wordlist_path": "s3://mybucket/wordlists/common_passwords.txt",
-           "chunk_strategy": { "type": "LINE_BASED", "size": 10000 }
-         }'
-```
-The API would respond with a `job_id`, which can then be used to monitor status, pause/resume, or retrieve results.
+*   **`.env.example`**: This file in the project root provides a template and description of common environment variables. It's crucial for understanding available settings.
+*   **Pydantic Settings Files**: Each service has a Python configuration module that uses Pydantic's `BaseSettings` to load these environment variables:
+    *   API Server: `app/config.py` (loads `Settings`)
+    *   Worker: `workers/config.py` (loads `WorkerSettings`)
+    *   Monitor: `scripts/config_monitor.py` (loads `MonitorSettings`)
+*   **Docker Compose Overrides**: When running via `docker-compose.yml`, environment variables set directly in the `environment:` section for each service will take precedence over defaults in the Python settings files. If an `.env` file is explicitly loaded by a service in `docker-compose.yml` via `env_file:`, those values can also influence the configuration.
 
-## 6. Contributing (Placeholder)
+Key variables to be aware of:
+*   `REDIS_HOST`, `REDIS_PORT`: For connecting to Redis.
+*   `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`: For MinIO/S3 connection.
+*   `TARGET_JOB_ID` (for workers): Specifies which job queue a worker instance should listen to. This is essential for worker operation.
+*   Monitor-specific settings like `STALE_TASK_TIMEOUT_SECONDS`, `MONITOR_POLL_INTERVAL_SECONDS`.
 
-This project currently exists as a set of design documents. Should this project move towards an actual implementation, contributions would be welcome! Standard open-source practices would apply:
+### Interacting with the System (Conceptual)
+
+Once the system is running (e.g., via `docker-compose up`), you can interact with it through its API.
+
+1.  **Prepare Wordlist in MinIO:**
+    The API server and workers expect wordlists to be in an S3-compatible object store (MinIO by default in Docker Compose).
+    *   Access MinIO console: `http://localhost:9001` (default credentials: `minioadmin/minioadmin`).
+    *   The `wordlists` bucket is created automatically by the MinIO service in `docker-compose.yml`.
+    *   Upload your wordlist file (e.g., `sample.txt`) into the `wordlists` bucket.
+    *   Alternatively, use the MinIO Client (`mc`):
+        ```bash
+        # 1. Install mc: https://min.io/docs/minio/linux/reference/minio-mc.html#install-mc
+        # 2. Alias your local MinIO:
+        mc alias set myminio http://localhost:9000 minioadmin minioadmin
+        # 3. Create a sample wordlist file:
+        echo -e "password123\ntestword\nsecret" > sample.txt
+        # 4. Copy to the 'wordlists' bucket (which should be auto-created):
+        mc cp sample.txt myminio/wordlists/sample.txt
+        ```
+
+2.  **Submit a Job:**
+    Use a tool like `curl` or Postman to send a POST request to the `/api/v1/jobs` endpoint.
+    ```bash
+    # Ensure wordlists/sample.txt exists in your MinIO 'wordlists' bucket
+    curl -X POST "http://localhost:8000/api/v1/jobs" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "target_info": {
+        "url": "http://example.com/login", 
+        "service_type": "http_post_form",
+        "additional_params": {"secret_password_to_find": "password123"} 
+      },
+      "wordlist_storage_type": "minio",
+      "wordlist_path": "wordlists/sample.txt", 
+      "chunk_strategy": {
+        "type": "LINE_BASED",
+        "size": 100 
+      }
+    }'
+    ```
+    *   The `target_info.additional_params.secret_password_to_find` is used by the current placeholder `perform_attempt` logic in `workers/worker.py`.
+    *   The API should respond with a JSON object containing the `job_id`. Note this `job_id`.
+
+3.  **Configure and Start Workers for the Job:**
+    *   Edit your `.env` file (or `docker-compose.yml` if you prefer to manage it there).
+    *   Set the `TARGET_JOB_ID` variable to the `job_id` you received from the API.
+        Example in `.env`: `TARGET_JOB_ID=your_job_id_here`
+    *   If `docker-compose.yml` for the worker service uses `env_file: .env`, these changes will be picked up when workers (re)start.
+    *   If workers are already running, you might need to restart them to pick up the new `TARGET_JOB_ID` unless they are designed to dynamically query for available jobs (which the current basic worker is not).
+        ```bash
+        docker-compose restart worker 
+        # Or if scaling:
+        # docker-compose up --scale worker=1 -d # (Adjust scale as needed)
+        ```
+
+4.  **Check Job Status:**
+    Use the `job_id` to query the job's status:
+    ```bash
+    curl "http://localhost:8000/api/v1/jobs/your_job_id_here"
+    ```
+
+5.  **Get Job Results:**
+    Once the job has processed some chunks and found results (based on the placeholder `perform_attempt`):
+    ```bash
+    curl "http://localhost:8000/api/v1/jobs/your_job_id_here/results"
+    ```
+
+## 6. Project Structure Overview
+
+The project is organized into the following main directories:
+
+*   **`app/`**: Contains the FastAPI API server application.
+    *   `api/`: Defines the API endpoints (e.g., job submission, status).
+    *   `core/`: Core business logic for job management and wordlist processing.
+    *   `config.py`: Pydantic settings for the API server.
+    *   `main.py`: FastAPI application entry point.
+*   **`workers/`**: Contains the worker node application.
+    *   `worker.py`: Main script for worker logic (task fetching, processing).
+    *   `config.py`: Pydantic settings for workers.
+    *   `target_connectors/`: (Conceptual) For different brute-force target types.
+*   **`common/`**: Shared utilities, e.g., Redis and S3 client initializers.
+*   **`scripts/`**: Standalone scripts, such as the `monitor.py` for handling stale tasks.
+*   **`docs/`**: All design and architecture markdown documents.
+*   **`docker-compose.yml`**: Defines services for running the entire stack (Redis, MinIO, API server, workers, monitor).
+*   **`Dockerfile`s**: Located in `app/`, `workers/`, and `scripts/` for building container images.
+
+## 7. Contributing (Placeholder)
+
+This project currently exists as a set of design documents and basic structural code. Should this project move towards a more complete implementation, contributions would be welcome! Standard open-source practices would apply:
 
 1.  Fork the repository.
 2.  Create a new branch for your feature or bug fix.
@@ -183,8 +249,7 @@ This project currently exists as a set of design documents. Should this project 
 
 Discussions on design improvements or implementation strategies are also encouraged via Issues.
 
-## 7. License
+## 8. License
 
 This project is licensed under the **MIT License**.
 (A `LICENSE` file would be included in the root directory with the full text of the MIT License if this were a coded project.)
-```
