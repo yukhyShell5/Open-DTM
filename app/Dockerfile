@@ -5,13 +5,16 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the requirements file into the container at /app
-COPY ./requirements.txt /app/requirements.txt
+# Path is relative to the build context (project root)
+COPY ./app/requirements.txt /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container at /app
-COPY . /app
+# This copies the content of the 'app' directory from the build context (project root)
+# into the '/app' directory in the container (which is the WORKDIR).
+COPY ./app/ /app/
 
 # Expose port 8000 for Uvicorn
 EXPOSE 8000

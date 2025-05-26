@@ -1,13 +1,15 @@
 FROM python:3.9-slim
 
-WORKDIR /monitor_app
+WORKDIR /monitor_app # Initial WORKDIR
 
 ENV PYTHONPATH "${PYTHONPATH}:/app_root"
 
-# Copy monitor script and its config, and common if needed by redis_client
-COPY ./scripts /app_root/scripts
-COPY ./common /app_root/common # If common.redis_client is used by monitor
+# Copy necessary application code from the build context (project root)
+# into the /app_root directory in the container.
+COPY ./scripts/ /app_root/scripts/
+COPY ./common/ /app_root/common/ # If common.redis_client is used by monitor
 
+# Set the final working directory
 WORKDIR /app_root/scripts
 
 # Install dependencies (just redis client, pydantic-settings for now)
