@@ -1,0 +1,16 @@
+FROM python:3.9-slim
+
+WORKDIR /monitor_app
+
+ENV PYTHONPATH "${PYTHONPATH}:/app_root"
+
+# Copy monitor script and its config, and common if needed by redis_client
+COPY ./scripts /app_root/scripts
+COPY ./common /app_root/common # If common.redis_client is used by monitor
+
+WORKDIR /app_root/scripts
+
+# Install dependencies (just redis client, pydantic-settings for now)
+RUN pip install --no-cache-dir redis pydantic-settings
+
+CMD ["python", "-u", "monitor.py"]
