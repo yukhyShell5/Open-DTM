@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Distribued Task Manager</title>
+    </head>
+
+    <script>
+            
+        fetch('http://localhost:8000/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.worker-total').textContent = data.total_workers;
+            })
+            .catch(error => console.error('Error fetching worker stats:', error));
+
+        fetch('http://localhost:8000/workers')
+            .then(response => response.json())
+            .then(data => {
+                const workerList = document.querySelector('.worker-list');
+                workerList.innerHTML = ''; 
+                if (data.length > 0) {
+                    data.forEach(worker => {
+                        const workerDiv = document.createElement('div');
+                        workerDiv.className = 'worker';
+                        workerDiv.textContent = `Worker ID: ${worker.id}, Status: ${worker.status}, CurrentTask: ${worker.current_task || 'Aucun'}`;
+                        workerList.appendChild(workerDiv);
+                    });
+                } else {
+                    workerList.innerHTML = '<div class="worker">pas de worker sur le reseau</div>';
+                }
+            })
+            .catch(error => console.error('Error fetching workers:', error));
+
+        fetch('http://localhost:8000/tasks')
+            .then(response => response.json())
+            .then(data => {
+                const taskList = document.querySelector('.task-list');
+                taskList.innerHTML = ''; 
+                if (data.length > 0) {
+                    data.forEach(task => {
+                        const taskDiv = document.createElement('div');
+                        taskDiv.className = 'task';
+                        taskDiv.textContent = `Task ID: ${task.id}, Description: ${task.command}, Status: ${task.status}, Result: ${task.result}`;
+                        taskList.appendChild(taskDiv);
+                    });
+                } else {
+                    taskList.innerHTML = '<div class="task">pas de tâches en cours</div>';
+                }
+            })
+            .catch(error => console.error('Error fetching tasks:', error));
+
+    </script>
+
+    <body>
+        <div class="stats">
+
+            <div class="worker-total">0</div>
+
+        </div>
+
+        <div class="worker-list">
+            <div class="worker"></div>
+        </div>
+
+        <div class="task-list">
+            <div class="task"></div>
+        </div>
+    </body>
+
+</html>

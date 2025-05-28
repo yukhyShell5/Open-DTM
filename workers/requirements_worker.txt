@@ -1,4 +1,0 @@
-redis
-boto3 # For AWS S3
-minio # For MinIO specific client, if preferred over boto3 for MinIO
-pydantic-settings # For managing settings
