@@ -6,45 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.hypothesis/
-.pytest_cache/
-*.egg-info/
-.env
-.env.*
 
-# Node.js / NuxtJS
-node_modules/
-.nuxt/
-# Nuxt 3 build output directory (adjust if using Nuxt 2's `dist`)
-.output/
-# Nuxt dev server cache
-.vite/
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-# Local .env files
-.env
-.env.*
-!/.env.example
 # IDEs and editors
 .vscode/
 .idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
