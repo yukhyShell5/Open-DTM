@@ -28,7 +28,7 @@ jobs:
       - name: Launch FastAPI server
         run: |
           nohup uvicorn src.server:app --host 0.0.0.0 --port 8000 &
-          sleep 3  # Laisse le temps au serveur de démarrer
+          sleep 10  # Laisse le temps au serveur de démarrer
 
       - name: Run tests
         run: pytest tests/
