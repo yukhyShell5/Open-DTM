@@ -28,16 +28,16 @@ Un système de gestion de tâches distribué minimaliste pour exécuter des comm
 
 ### Installation
 ```bash
-pip install git+https://github.com/votrecompte/distributed-task-manager.git
+pip install git+https://github.com/yukhyShell5/distribued-command.git
 ```
 
 ### Lancement
 ```bash
 # Démarrer le serveur
-dtm-server --port 8000
+python server.py
 
 # Dans un autre terminal - Démarrer un worker
-dtm-worker --manager http://localhost:8000
+python src/worker.py
 ```
 
 ### Utilisation Basique

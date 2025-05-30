@@ -1,14 +1,16 @@
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
-from typing import Dict, Optional, List, Deque
 import uuid
 import time
 import asyncio
-from collections import deque
 import logging
-from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
+from collections import deque
+from pydantic import BaseModel
+from typing import Dict, Optional, List, Deque
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Request
 
 app = FastAPI()
 
@@ -20,9 +22,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+current_dir = Path(__file__).parent
+
+# Configurer les chemins pour les fichiers statiques et templates
+static_dir = current_dir / "static"
+templates_dir = current_dir / "templates"
+
+# Créer les répertoires s'ils n'existent pas
+static_dir.mkdir(exist_ok=True)
+templates_dir.mkdir(exist_ok=True)
+
 # Montage des fichiers statiques et templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+templates = Jinja2Templates(directory=str(templates_dir))
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)

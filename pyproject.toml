@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-DTM"
+description = "start broke the word"
+version = "0.1.0"
+authors = [{ name = "Shell", email = "mail@example.com" }]
+license = "MIT"
+dependencies = [
+    "fastapi",
+    "aiohttp"
+]
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "flake8"]

@@ -4,6 +4,10 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.coverage
+.pytest_cache/
+build/
+*.egg-info/
 env/
 venv/
 
