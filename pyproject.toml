@@ -8,10 +8,12 @@ description = "start broke the word"
 version = "0.1.0"
 authors = [{ name = "Shell", email = "mail@example.com" }]
 license = "MIT"
+readme = "README.md"
 dependencies = [
     "fastapi",
     "aiohttp",
-    "pre-commit"
+    "pre-commit",
+    "docker"
 ]
 
 [project.optional-dependencies]

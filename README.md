@@ -1,7 +1,7 @@
 # Open DTM (Distributed Task Manager)
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL](https://img.shields.io/badge/license-AGPL--v3-green)](https://opensource.org/license/agpl-v3)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/votrecompte/distributed-task-manager/badge)](https://securityscorecards.dev/viewer/?uri=github.com/votrecompte/distributed-task-manager)
 
 Un système de gestion de tâches distribué minimaliste pour exécuter des commandes shell sur des workers. Parfait pour le traitement parallèle et les démonstrations éducatives.
