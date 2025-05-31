@@ -10,14 +10,9 @@ authors = [{ name = "Shell", email = "mail@example.com" }]
 license = "MIT"
 dependencies = [
     "fastapi",
-    "aiohttp"
+    "aiohttp",
+    "pre-commit"
 ]
-
-[tool.setuptools]
-packages = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
 
 [project.optional-dependencies]
 dev = ["pytest", "black", "flake8"]

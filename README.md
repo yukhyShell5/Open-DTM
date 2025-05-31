@@ -1,4 +1,4 @@
-# Distributed Task Manager (DTM)
+# Open DTM (Distributed Task Manager)
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -28,13 +28,14 @@ Un système de gestion de tâches distribué minimaliste pour exécuter des comm
 
 ### Installation
 ```bash
-pip install git+https://github.com/yukhyShell5/distribued-command.git
+git clone git+https://github.com/yukhyShell5/Open-DTM.git
+pip install .
 ```
 
 ### Lancement
 ```bash
 # Démarrer le serveur
-python server.py
+python src/server.py
 
 # Dans un autre terminal - Démarrer un worker
 python src/worker.py
@@ -50,13 +51,7 @@ curl "http://localhost:8000/tasks" | jq
 ```
 
 ## Architecture
-```
-graph TD
-    Client -->|Submit| Manager
-    Manager -->|Push Tasks| Worker1
-    Manager -->|Push Tasks| Worker2
-    Worker -->|Heartbeats| Manager
-```
+![graph](https://mermaid.ink/img/pako:eNqNkD1vgzAQhv8Kupkg29QxeOiSDF0iVWqlShWLU18AEWxkbKkt8N_rQD_W3nSv7nnva4I3qxEk1E4NTfJ8rEwS43Bt0fhkt7ufn8K5b_2cnJRRNbqt_i1W4DGM0ajGbpyTF-s6dPQ_ENugTazMAyrnz6j8-DsN0rhYq0F6FzCFHl2vbhKmm7sC32CPFciYauW6CiqzRM-gzKu1_Y_N2VA3IC_qOkYVBq08HlsVT_5D0Gh0BxuMB0lpvvYAOcE7SLYvs70oKCG84GUueAofIHlGSlqUglBSkJyxfEnhcx1KspJxTjkjvLwToiAiBdStt-60_Xp9-fIFdpJ2eA?type=png)
 
 ## Contribuer
 Les contributions sont bienvenues ! Voir :
